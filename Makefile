@@ -107,9 +107,16 @@ beta:
 
 travis_beta:
 	git log $(LAST_TAG).. > /tmp/git-log.txt
-	go run bin/cross-compile.go -release beta-latest -git-log /tmp/git-log.txt $(TAG)β
+	go run bin/cross-compile.go -release beta-latest -git-log /tmp/git-log.txt -exclude "^windows/" $(TAG)β
 	rclone --config bin/travis.rclone.conf -v copy --exclude '*beta-latest*' build/ memstore:beta-rclone-org/$(TAG)
 	rclone --config bin/travis.rclone.conf -v copy --include '*beta-latest*' build/ memstore:beta-rclone-org
+	@echo Beta release ready at $(BETA_URL)
+
+appveyor_beta:
+	git log $(LAST_TAG).. > /tmp/git-log.txt
+	go run bin/cross-compile.go -release beta-latest -git-log /tmp/git-log.txt -include "^windows/" -cgo $(TAG)
+	rclone --config bin/travis.rclone.conf -v copy --exclude '*beta-latest*' build/ memstore:beta-rclone-org/test/$(TAG)
+	rclone --config bin/travis.rclone.conf -v copy --include '*beta-latest*' build/ memstore:beta-rclone-org/test
 	@echo Beta release ready at $(BETA_URL)
 
 serve:	website
